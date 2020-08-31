@@ -19,7 +19,7 @@
 const awsIoT = require('aws-iot-device-sdk');
 
 // Load the endpoint from file
-const endpointFile = require('/home/ec2-user/workspace/endpoint.json');
+const endpointFile = require('./endpoint.json');
 
 // Fetch the thingName from the folder name
 const thingName = "car1";
