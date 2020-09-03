@@ -20,12 +20,10 @@ const awsIoT = require('aws-iot-device-sdk');
 
 // Require crypto for random numbers generation
 const crypto = require('crypto');
-// Load the endpoint from file
-const endpointFile = require('/home/ec2-user/workspace/endpoint.json');
 
 // Fetch the deviceName from the folder name
-const deviceName = 'car1';
-const endpointAddress = 'ap5awvlyxg11q.ats.iot.cn-north-1.amazonaws.com.cn'
+const deviceName = 'car-01';
+const endpointAddress = 'a1ba8o0iqbelxz.ats.iot.cn-north-1.amazonaws.com.cn'
 // Create the thingShadow object with argument data
 const device = awsIoT.device({
    keyPath: 'private.pem.key',
@@ -45,7 +43,8 @@ device.on('connect', function() {
 function infiniteLoopPublish() {
     console.log('Sending car telemetry data to AWS IoT for ' + deviceName);
     // Publish car data to edx/telemetry topic with getCarData
-    device.publish("auto/telemetry", JSON.stringify(getCarData(deviceName)));
+    const publish_topic = "auto/" + deviceName
+    device.publish(publish_topic, JSON.stringify(getCarData(deviceName)));
     
     // Start Infinite Loop of Publish every 5 seconds
     setTimeout(infiniteLoopPublish, 5000);
@@ -66,20 +65,15 @@ function getCarData(deviceName) {
         'oil_temp_mean': randomFloatBetween(12.7100589, 205.3165256)
     };
     const device_data = { 
-        'car1': {
+        'car': {
             'vin': 'I5Z45ZSGBRZFU4YRM',
             'latitude':39.122229,
             'longitude':-77.133578
-        },
-        'car2': {
-            'vin': 'ETWUASOOGRZOPQRTR',
-            'latitude': 40.8173411,
-            'longitude': -73.94332990000001
         }
     };
-    message['vin'] = device_data[deviceName].vin;
-    message['latitude'] = device_data[deviceName].latitude;
-    message['longitude'] = device_data[deviceName].longitude;
+    message['vin'] = device_data['car'].vin;
+    message['latitude'] = device_data['car'].latitude;
+    message['longitude'] = device_data['car'].longitude;
     message['device'] = deviceName;
     message['datetime'] = new Date().toISOString().replace(/\..+/, '');
     return message;

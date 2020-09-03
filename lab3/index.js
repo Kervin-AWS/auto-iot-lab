@@ -23,7 +23,7 @@ var AWS = require('aws-sdk');
 var AWSIoTData = require('aws-iot-device-sdk');
 
 // Set Thing name constant
-const thingName = "car1";
+const deviceName = "car-01";
 
 // Initialize the configuration.
 AWS.config.region = AWSConfiguration.region;
@@ -59,7 +59,7 @@ AWS.config.credentials.get(function (err, data) {
                     host: AWSConfiguration.endpoint,
 
                     // Use a random client ID.
-                    clientId: thingName + '-' + (Math.floor((Math.random() * 100000) + 1)),
+                    clientId: deviceName + '-' + (Math.floor((Math.random() * 100000) + 1)),
 
                     // Connect via secure WebSocket
                     protocol: 'wss',
@@ -76,7 +76,7 @@ AWS.config.credentials.get(function (err, data) {
                 });
 
                 // Update car image whenever we receive status events from the shadows.
-                thingShadows.on('status', function (thingName, statusType, clientToken, stateObject) {
+                thingShadows.on('status', function (deviceName, statusType, clientToken, stateObject) {
                     console.log('status event received for my own operation')
                     if (statusType === 'rejected') {
                         // If an operation is rejected it is likely due to a version conflict;
@@ -85,7 +85,7 @@ AWS.config.credentials.get(function (err, data) {
                         // yet been created or has been deleted.
                         if (stateObject.code !== 404) {
                             console.log('re-sync with thing shadow');
-                            var opClientToken = thingShadows.get(thingName);
+                            var opClientToken = thingShadows.get(deviceName);
                             if (opClientToken === null) {
                                 console.log('operation in progress');
                             }
@@ -103,7 +103,7 @@ AWS.config.credentials.get(function (err, data) {
 
                 // Update car image whenever we receive foreignStateChange events from the shadow.
                 // This is triggered when the car Thing updates its state.
-                thingShadows.on('foreignStateChange', function (thingName, operation, stateObject) {
+                thingShadows.on('foreignStateChange', function (deviceName, operation, stateObject) {
                     console.log('foreignStateChange event received')
                     
                     // If the operation is an update
@@ -129,17 +129,17 @@ AWS.config.credentials.get(function (err, data) {
 
                     // We only register the shadow once.
                     if (!shadowsRegistered) {
-                        thingShadows.register(thingName, {}, function (err, failedTopics) {
+                        thingShadows.register(deviceName, {}, function (err, failedTopics) {
                             
                             // If there are no errors
                             if (!err) {                    
-                                console.log(thingName + ' has been registered');
+                                console.log(deviceName + ' has been registered');
 
                                 // Update the messages div with new status
-                                document.getElementById('messages').innerHTML = '<p>Registered to ' + thingName + ' Shadow. Fetching the current lights</p>';
+                                document.getElementById('messages').innerHTML = '<p>Registered to ' + deviceName + ' Shadow. Fetching the current lights</p>';
 
                                 // Fetch the initial state of the Shadow
-                                var opClientToken = thingShadows.get(thingName);
+                                var opClientToken = thingShadows.get(deviceName);
                                 if (opClientToken === null) {
                                     console.log('operation in progress');
                                 }
@@ -153,7 +153,7 @@ AWS.config.credentials.get(function (err, data) {
                 // current light status
                 const CarLightsEventButton = document.getElementById('CarLightsEventButton');
                 CarLightsEventButton.addEventListener('click', (evt) => {
-                    thingShadows.update(thingName, { state: { desired: { lights: !currentLightStatus } } });
+                    thingShadows.update(deviceName, { state: { desired: { lights: !currentLightStatus } } });
                 });
 
             } else {
